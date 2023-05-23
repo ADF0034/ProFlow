@@ -13,10 +13,16 @@ namespace ProFlow.Models
         [DisplayName("Title")]
         public string Title { get; set; }
         [DisplayName("Description")]
-        public string Beskrivelse { get; set; }
+        public string? Beskrivelse { get; set; }
+        [DisplayName("Estimert tid")]
+        public float EstimatedTime { get; set; }
+        [DisplayName("Status")]
+        public bool? Assignt { get; set; } = false;
+        [NotMapped]
+        public string Userid { get; set; }
         [ForeignKey("ProjectModel")]
         public Guid ProjectId { get; set; }
-        public ProjectModel ProjectModel { get; set; }
-        public ICollection<TimeStampModel> timeStamps { get; set; }
+        public ProjectModel? ProjectModel { get; set; }
+        public ICollection<TimeStampModel>? timeStamps { get; set; }
     }
 }

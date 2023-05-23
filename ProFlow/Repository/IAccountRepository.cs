@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using ProFlow.Models;
+using ProFlow.Models.APIModels;
 
 namespace ProFlow.Repository
 {

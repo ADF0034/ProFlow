@@ -17,7 +17,7 @@ namespace ProFlow.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.2")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -232,23 +232,37 @@ namespace ProFlow.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("ProFlow.Models.ApplicationUserToAssignments", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AssignmentsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "AssignmentsId");
+
+                    b.HasIndex("AssignmentsId");
+
+                    b.ToTable("UserToAssignments");
+                });
+
             modelBuilder.Entity("ProFlow.Models.ApplicationUserToProject", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("UserId1")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int?>("roleid")
+                        .HasColumnType("int");
 
-                    b.HasKey("UserId", "ProjectId");
+                    b.HasKey("UserId", "ProjectId", "roleid");
 
                     b.HasIndex("ProjectId");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("roleid");
 
                     b.ToTable("userToProjects");
                 });
@@ -261,9 +275,14 @@ namespace ProFlow.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssigmentID"));
 
+                    b.Property<bool?>("Assignt")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Beskrivelse")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("EstimatedTime")
+                        .HasColumnType("real");
 
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uniqueidentifier");
@@ -326,7 +345,6 @@ namespace ProFlow.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Owner")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
@@ -338,12 +356,43 @@ namespace ProFlow.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("TimeEntry")
                         .HasColumnType("bit");
+
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("ProjectId");
 
                     b.ToTable("projects");
+                });
+
+            modelBuilder.Entity("ProFlow.Models.Roles", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("Beskrivelse")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("roles");
                 });
 
             modelBuilder.Entity("ProFlow.Models.TimeStampModel", b =>
@@ -373,6 +422,42 @@ namespace ProFlow.Data.Migrations
                     b.HasIndex("AssignmentsAssigmentID");
 
                     b.ToTable("timeStamps");
+                });
+
+            modelBuilder.Entity("ProFlow.Models.UserRoles", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("ProFlow.Models.UserRolesToRoles", b =>
+                {
+                    b.Property<int>("UserRolesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Roleid")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserRolesId", "Roleid");
+
+                    b.HasIndex("Roleid");
+
+                    b.ToTable("userRolesToRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -426,6 +511,25 @@ namespace ProFlow.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProFlow.Models.ApplicationUserToAssignments", b =>
+                {
+                    b.HasOne("ProFlow.Models.Assignments", "Assignments")
+                        .WithMany()
+                        .HasForeignKey("AssignmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProFlow.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assignments");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ProFlow.Models.ApplicationUserToProject", b =>
                 {
                     b.HasOne("ProFlow.Models.ProjectModel", "project")
@@ -436,13 +540,21 @@ namespace ProFlow.Data.Migrations
 
                     b.HasOne("ProFlow.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId1")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProFlow.Models.Roles", "role")
+                        .WithMany()
+                        .HasForeignKey("roleid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
 
                     b.Navigation("project");
+
+                    b.Navigation("role");
                 });
 
             modelBuilder.Entity("ProFlow.Models.Assignments", b =>
@@ -476,6 +588,36 @@ namespace ProFlow.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Assignments");
+                });
+
+            modelBuilder.Entity("ProFlow.Models.UserRoles", b =>
+                {
+                    b.HasOne("ProFlow.Models.ProjectModel", "ProjectModel")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProjectModel");
+                });
+
+            modelBuilder.Entity("ProFlow.Models.UserRolesToRoles", b =>
+                {
+                    b.HasOne("ProFlow.Models.Roles", "role")
+                        .WithMany()
+                        .HasForeignKey("Roleid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProFlow.Models.UserRoles", "userRoles")
+                        .WithMany()
+                        .HasForeignKey("UserRolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("role");
+
+                    b.Navigation("userRoles");
                 });
 
             modelBuilder.Entity("ProFlow.Models.Assignments", b =>

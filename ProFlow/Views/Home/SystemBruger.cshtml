@@ -1,0 +1,48 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+@{
+}
+
+<h1>
+    Bruger i systemet
+</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <p>Navn</p>
+            </th>
+            <th>
+                <p>Rolle</p>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in users)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Role)
+                </td>
+                <td>
+                    @if (item.Role != "Owner" && item.Role != "Admin")
+                    {
+
+                        <a asp-action="UpdateToAdmin" asp-route-UserId="@item.Id" asp-route-projectId="@ProjectId" asp-route-projectname="@projectname">Update user status til admin</a>
+                    }
+                    else
+                    {
+                        <a asp-action="UpdateToNormalUser" asp-route-UserId="@item.Id" asp-route-projectId="@ProjectId" asp-route-projectname="@projectname">Update user status til admin</a>
+                    }
+                    <a asp-action="RemoveUserFromProject" asp-route-UserId="@item.Id" asp-route-projectId="@ProjectId" asp-route-projectname="@projectname">Fjern Bruger fra Projkt</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>*@
